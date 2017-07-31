@@ -5,6 +5,8 @@ This is a small Spring Boot based web service that fetches Google Finance histor
 ## Build instructions
 This is a standard gradle project.
 
+You will need Lombok plugin for your IDE to properly build it there.
+
 ## API
 
 GET **:8080/historical/v1/cids/{cid}/month-end-closing-prices**
