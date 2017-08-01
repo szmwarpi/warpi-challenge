@@ -1,6 +1,7 @@
 package warpi.service;
 
 import lombok.extern.log4j.Log4j;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.springframework.stereotype.Service;
 import warpi.model.ClosingPriceAtDate;
@@ -10,11 +11,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.ParseException;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
-import java.util.stream.Stream;
+import java.util.*;
 
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.reverseOrder;
 import static java.util.stream.Collectors.toList;
 
 @Service
@@ -28,20 +28,24 @@ public class CsvProcessor {
     private static final FastDateFormat dateFormat = FastDateFormat.getInstance("dd-MMM-yy", TimeZone.getTimeZone("UTC"));
 
     public List<ClosingPriceAtDate> process(InputStream csv) {
+        return filterForMonthEnds(extactAllDataPoints(csv));
+    }
+
+    private List<ClosingPriceAtDate> extactAllDataPoints(InputStream csv) {
         BufferedReader br = null;
         try {
+
             br = new BufferedReader(new InputStreamReader(csv));
+
             validateHeader(br);
-            return process(br.lines());
+
+            List<ClosingPriceAtDate> allDataPoints = br.lines().map(this::parseLine).collect(toList());
+
+            return allDataPoints;
+
         } finally {
-            try {
-                if (br != null) {
-                    br.close();
-                }
-                csv.close();
-            } catch (IOException e) {
-                log.error("Cannot close inputstream", e);
-            }
+            IOUtils.closeQuietly(br);
+            IOUtils.closeQuietly(csv);
         }
     }
 
@@ -59,8 +63,26 @@ public class CsvProcessor {
         }
     }
 
-    private List<ClosingPriceAtDate> process(Stream<String> lines) {
-        return lines.map(this::parseLine).filter(this::filterMonthEnd).collect(toList());
+    private List<ClosingPriceAtDate> filterForMonthEnds(List<ClosingPriceAtDate> dataPoints) {
+
+        dataPoints.sort(comparing(ClosingPriceAtDate::getDate, reverseOrder()));
+
+        ArrayList<ClosingPriceAtDate> result = new ArrayList<>();
+        Integer monthLastSeen = null;
+        for (ClosingPriceAtDate dataPoint : dataPoints) {
+            int month = getMonth(dataPoint);
+            if (monthLastSeen == null) {
+                monthLastSeen = month;
+            } else if ( ! monthLastSeen.equals(month)) {
+                result.add(dataPoint);
+                monthLastSeen = month;
+            }
+        }
+        return result;
+    }
+
+    private Integer getMonth(ClosingPriceAtDate dataPoint) {
+        return dataPoint.getDate().getMonth();
     }
 
     private ClosingPriceAtDate parseLine(String line) {
@@ -79,7 +101,4 @@ public class CsvProcessor {
         }
     }
 
-    private boolean filterMonthEnd(ClosingPriceAtDate closingPriceAtDate) {
-        return true;
-    }
 }

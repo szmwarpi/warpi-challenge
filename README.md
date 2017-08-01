@@ -15,3 +15,5 @@ Fetches the closing price of the given cid on every month-end since 1990.
 
 Returns a JSON array of: {"date":"MM-dd-YYYY","close":0.00}
 
+The array is always in reverse chronological order, and the last month is ignored.
+
