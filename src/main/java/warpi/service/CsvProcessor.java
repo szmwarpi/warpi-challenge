@@ -2,6 +2,7 @@ package warpi.service;
 
 import lombok.extern.log4j.Log4j;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.springframework.stereotype.Service;
 import warpi.model.ClosingPriceAtDate;
@@ -21,7 +22,7 @@ import static java.util.stream.Collectors.toList;
 @Log4j
 public class CsvProcessor {
 
-    private static final String EXPECTED_HEADER = "Date,Open,High,Low,Close,Volume";
+    private static final String EXPECTED_HEADER = "\uFEFFDate,Open,High,Low,Close,Volume";
     private static final int INDEX_OF_DATE = 0;
     private static final int INDEX_OF_CLOSE_PRICE = 4;
 
@@ -56,7 +57,7 @@ public class CsvProcessor {
                 throw new MalformedCsvException("The csv did not even contain header");
             }
             if ( ! EXPECTED_HEADER.equals(header)) {
-                throw new MalformedCsvException(String.format("Unexpected header line: %1.100s", header));
+                throw new MalformedCsvException(String.format("Unexpected header line: '%1.100s'", header));
             }
         } catch (IOException e) {
             throw new MalformedCsvException("Cannot read first line", e);

@@ -22,7 +22,7 @@ public class CsvProcessorTest {
 
     @Test
     public void closesInputStream() {
-        InputStream inputStream = IOUtils.toInputStream("Date,Open,High,Low,Close,Volume\n");
+        InputStream inputStream = IOUtils.toInputStream("\uFEFFDate,Open,High,Low,Close,Volume\n");
         AtomicBoolean isClosed = new AtomicBoolean(false);
         InputStream inputStreamCheckingClosed = new InputStream() {
             @Override
@@ -100,7 +100,7 @@ public class CsvProcessorTest {
 
     private static List<ClosingPriceAtDate> testRun(String ... lines) {
         InputStream inputStream = IOUtils.toInputStream(
-                "Date,Open,High,Low,Close,Volume\n"
+                "\uFEFFDate,Open,High,Low,Close,Volume\n"
                 + String.join("\n", lines));
         CsvProcessor csvProcessor = new CsvProcessor();
         return csvProcessor.process(inputStream);
