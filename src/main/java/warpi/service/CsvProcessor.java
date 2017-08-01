@@ -2,7 +2,6 @@ package warpi.service;
 
 import lombok.extern.log4j.Log4j;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.springframework.stereotype.Service;
 import warpi.model.ClosingPriceAtDate;

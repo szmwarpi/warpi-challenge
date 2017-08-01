@@ -12,9 +12,9 @@ import static java.util.stream.Collectors.toList;
 public class Configuration {
 
     @Bean
-    List<Long> acceptedCids(@Value("${acceptedCids}") String cidList) {
-        return Arrays.asList(cidList.split(","))
-                .stream().map(Long::valueOf)
+    public List<Long> acceptedCids(@Value("${acceptedCids}") String cidList) {
+        return Arrays.stream(cidList.split(","))
+                .map(Long::valueOf)
                 .collect(toList());
     }
 
