@@ -46,7 +46,7 @@ public class CsvProcessorTest {
         InputStream inputStream = IOUtils.toInputStream("");
         CsvProcessor csvProcessor = new CsvProcessor();
         try {
-            List<ClosingPriceAtDate> results = csvProcessor.process(inputStream);
+            csvProcessor.process(inputStream);
         } catch(MalformedCsvException e) {
             return;
         }

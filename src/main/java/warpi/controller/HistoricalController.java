@@ -10,10 +10,7 @@ import warpi.model.ClosingPriceAtDate;
 import warpi.service.CsvFetcher;
 import warpi.service.CsvProcessor;
 
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.List;
-import java.util.TimeZone;
 
 @RestController
 @RequestMapping(value = "/historical/v1")
@@ -23,19 +20,29 @@ public class HistoricalController {
 
     private final CsvProcessor csvProcessor;
 
+    private final List<Long> acceptedCids;
+
     @Autowired
-    public HistoricalController(CsvFetcher csvFetcher, CsvProcessor csvProcessor) {
+    public HistoricalController(CsvFetcher csvFetcher, CsvProcessor csvProcessor, List<Long> acceptedCids) {
         this.csvFetcher = csvFetcher;
         this.csvProcessor = csvProcessor;
+        this.acceptedCids = acceptedCids;
     }
 
+    @RequestMapping(method = RequestMethod.GET,
+            value = "cids",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<Long> getAcceptedCids() {
+        return acceptedCids;
+    }
 
     @RequestMapping(method = RequestMethod.GET,
             value = "cids/{cid}/month-end-closing-prices",
             produces = MediaType.APPLICATION_JSON_VALUE)
     public List<ClosingPriceAtDate> monthEndClosingPrices(@PathVariable Long cid) throws Exception {
-
+        if ( ! acceptedCids.contains(cid)) {
+            throw new Exception("This is not an accepted CID: '"+cid+"'. Use the /cids endpoint to get a list of possibilities");
+        }
         return csvProcessor.process(csvFetcher.fetchCsvFor(cid));
-
     }
 }
